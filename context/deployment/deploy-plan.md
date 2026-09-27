@@ -53,7 +53,14 @@ Both confirmed registered via `wrangler secret list` (names only). Values were n
 
 ## CI/CD status
 
-**No auto-deploy is implemented.** `.github/workflows/ci.yml` still only runs `ci` (lint/typecheck/build) and `smoke` (against local Supabase) jobs — it does **not** deploy to Cloudflare. Despite `tech-stack.md`'s `ci_default_flow: auto-deploy-on-merge` hint, this was never built by the bootstrapper and was explicitly scoped out of this deployment as a separate future task. **Every deploy until that's built must be triggered manually** via the command sequence below.
+**Auto-deploy on merge to `master` is implemented** (added 2026-09-27), matching `tech-stack.md`'s `ci_default_flow: auto-deploy-on-merge` hint. Repo: `https://github.com/PawelWojno/TSQL-Doradca`.
+
+`.github/workflows/ci.yml` has three jobs: `ci` (lint/typecheck/build), `smoke` (auth-flow smoke test against local Supabase), and `deploy` (`needs: [ci, smoke]`, gated to `github.event_name == 'push' && github.ref == 'refs/heads/master'`, so it never runs on PRs or other branches). `deploy` runs `npm run build` then `npx wrangler deploy`.
+
+- `deploy` uses a GitHub **Environment** named `production`, restricted via a deployment branch policy to `master` only — this is enforced by GitHub itself (not just the `if:` condition in the workflow, which a PR could in principle edit). No required reviewer is configured, so merges to `master` deploy without a manual approval click.
+- Repo secrets used by CI: `SUPABASE_URL`, `SUPABASE_KEY` (build-time env, same values as the Cloudflare Worker secrets), `CLOUDFLARE_API_TOKEN` (scoped to the `t-sql-doradca` Worker only, not a global/account-wide token).
+- **Deliberately not implemented**: auto-syncing `SUPABASE_URL`/`SUPABASE_KEY` from GitHub Secrets into Cloudflare Worker secrets on every deploy (e.g. via `cloudflare/wrangler-action`'s `secrets:` input). Worker secrets stay exactly as set by the manual `wrangler secret put` calls above — rotating them is still a deliberate manual step, per `CLAUDE.md`'s production access boundary ("rotacja głównego sekretu... są to operacje wykonywane ręcznie").
+- Manual redeploy (command sequence below) is still available as a fallback but is no longer the primary path — normal flow is now "merge to `master`" → CI builds, smoke-tests, then deploys automatically.
 
 ## Rollback
 
