@@ -55,7 +55,9 @@ Both confirmed registered via `wrangler secret list` (names only). Values were n
 
 **Auto-deploy on merge to `master` is implemented** (added 2026-09-27), matching `tech-stack.md`'s `ci_default_flow: auto-deploy-on-merge` hint. Repo: `https://github.com/PawelWojno/TSQL-Doradca`.
 
-`.github/workflows/ci.yml` has three jobs: `ci` (lint/typecheck/build), `smoke` (auth-flow smoke test against local Supabase), and `deploy` (`needs: [ci, smoke]`, gated to `github.event_name == 'push' && github.ref == 'refs/heads/master'`, so it never runs on PRs or other branches). `deploy` runs `npm run build` then `npx wrangler deploy`.
+`.github/workflows/ci.yml` has three jobs: `ci` (lint/typecheck/build), `smoke` (auth-flow smoke test against local Supabase), and `deploy` (`needs: [ci, smoke]`, gated to `github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master')`, so it never runs on PRs). `deploy` runs `npm run build` then `npx wrangler deploy`.
+
+The workflow also accepts `workflow_dispatch` (added 2026-09-27) — a manual "Run workflow" trigger from the GitHub Actions tab, with a branch selector. `ci`/`smoke` will run on whatever branch is picked; `deploy` still only actually deploys if that branch is `master`, enforced by the `production` environment's deployment branch policy (not just the workflow's `if:` condition) — picking another branch fails the `deploy` job outright with a protection-rule error rather than deploying.
 
 - `deploy` uses a GitHub **Environment** named `production`, restricted via a deployment branch policy to `master` only — this is enforced by GitHub itself (not just the `if:` condition in the workflow, which a PR could in principle edit). No required reviewer is configured, so merges to `master` deploy without a manual approval click.
 - Repo secrets used by CI: `SUPABASE_URL`, `SUPABASE_KEY` (build-time env, same values as the Cloudflare Worker secrets), `CLOUDFLARE_API_TOKEN` (scoped to the `t-sql-doradca` Worker only, not a global/account-wide token).
@@ -68,9 +70,13 @@ Both confirmed registered via `wrangler secret list` (names only). Values were n
 
 ## Redeploy command sequence (for future reference)
 
-```
-npm run build
-npx wrangler deploy
-```
+Two manual options now exist, both bypassing the automatic `push`-to-`master` trigger:
+
+1. **From the GitHub Actions tab**: Actions → CI → "Run workflow" → branch `master`. Runs the full `ci` → `smoke` → `deploy` pipeline on demand, without needing a new commit.
+2. **From a local machine**:
+   ```
+   npm run build
+   npx wrangler deploy
+   ```
 
 (Secrets and bindings are already persisted in `wrangler.jsonc` / Cloudflare — no need to re-run `wrangler secret put` unless rotating a value.)
