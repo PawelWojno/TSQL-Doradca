@@ -29,3 +29,7 @@ pnpm-debug.log*
 
 # Claude Code local memory
 CLAUDE.local.md
+
+# Skill junctions into .agents/skills (source of truth lives there)
+.claude/skills/10x-cli-guide
+.claude/skills/10x-cli-setup
