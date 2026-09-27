@@ -1,4 +1,9 @@
 {
+  "env": {
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(npm *)",
@@ -16,16 +21,7 @@
       "Edit",
       "Write"
     ],
-    "ask": [
-      "Bash(curl *)",
-      "Bash(wget *)",
-      "Bash(git push *)",
-      "Bash(git push)"
-    ],
-    "deny": [
-      "Bash(rm -rf *)",
-      "Read(./.env)",
-      "Read(./.dev.vars)"
-    ]
+    "ask": ["Bash(curl *)", "Bash(wget *)", "Bash(git push *)", "Bash(git push)"],
+    "deny": ["Bash(rm -rf *)", "Read(./.env)", "Read(./.dev.vars)"]
   }
 }
