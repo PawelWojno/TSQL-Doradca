@@ -36,7 +36,7 @@ Full server-side rendering (`output: "server"` in astro.config.mjs). All pages a
 - **Astro components** for static content/layout; **React components** only when interactivity is needed.
 - **Tailwind class merging**: use the `cn()` helper from `@/lib/utils` (clsx + tailwind-merge) for conditional/merged class names. Do not concatenate class strings manually.
 - **shadcn/ui**: components live in `src/components/ui/`, "new-york" style variant. Install new ones with `npx shadcn@latest add [name]`.
-- **API routes**: use uppercase `GET`, `POST` exports; validate input with zod.
+- **API routes**: validate input with zod.
 - **Supabase migrations**: `supabase/migrations/` using naming format `YYYYMMDDHHmmss_short_description.sql`. Always enable RLS on new tables with granular per-operation, per-role policies.
 - **React**: no Next.js directives ("use client" etc.). Extract hooks to `src/components/hooks/`.
 - **Services/helpers** go in `src/lib/` (or `src/lib/services/` for extracted business logic).
@@ -44,84 +44,110 @@ Full server-side rendering (`output: "server"` in astro.config.mjs). All pages a
 
 ### Environment
 
-- Node.js v22.14.0 (see `.nvmrc`)
-- Env vars: `SUPABASE_URL`, `SUPABASE_KEY` (copy `.env.example` to `.env` for Node, or `.dev.vars` for Cloudflare local dev)
+- Node.js version per `@.nvmrc`
+- Env vars: `SUPABASE_URL`, `SUPABASE_KEY` (copy `.env.example` to `.env` for Node, or `.dev.vars` for Cloudflare local dev). Both are declared `optional: true` in `astro.config.mjs` — the app boots without them and shows a "not configured" banner (`src/lib/config-status.ts`, `src/components/Banner.astro`/`Topbar.astro`) instead of crashing.
 - Local Supabase: `npx supabase start` (requires Docker)
 - Cloudflare local dev: secrets go in `.dev.vars` (gitignored)
 - Deploy: `npx wrangler deploy` (requires Cloudflare account + `wrangler` auth)
 
 ## CI
 
-GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint + build on every push and PR to master. Requires `SUPABASE_URL` and `SUPABASE_KEY` repository secrets for the build step.
+GitHub Actions workflow (`.github/workflows/ci.yml`) has two jobs, on every push and PR to master:
+
+- `ci`: `npm ci` → `npx astro sync` → `npm run lint` → `npx astro check` → `npm run build`. Requires `SUPABASE_URL`/`SUPABASE_KEY` repo secrets.
+- `smoke`: spins up local Supabase, builds, runs preview, then `npm run smoke`.
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
-## Zestaw narzędzi AI 10xDevs — Moduł 1, Lekcja 3
+## 10xDevs AI Toolkit — Moduł 1, Lekcja 5
 
-Przygotuj szkielet projektu dla stosu wybranego w Lekcji 2, używając **łańcucha bootstrap**:
+Wybierz platformę wdrożeniową i wdroż na produkcję za pomocą **łańcucha infra**:
 
 ```
-(/10x-init  →  /10x-shape  →  /10x-prd)  →  /10x-tech-stack-selector  →  /10x-bootstrapper
+(/10x-init  →  /10x-shape  →  /10x-prd  →  /10x-tech-stack-selector  →  /10x-bootstrapper  →  /10x-agents-md  →  /10x-rule-review  →  /10x-lesson)  →  /10x-infra-research  →  Plan Mode deploy
 ```
 
-Łańcuch PRD pochodzi z Lekcji 1, a selektor stosu technologicznego z Lekcji 2 — oba zostały ponownie uwzględnione w tej lekcji, aby można było poprawić PRD lub zmienić stos w trakcie pracy. `/10x-bootstrapper` jest głównym tematem lekcji. Łańcuch kończy się tutaj w v1; przyszła Lekcja 4 skonfiguruje kontekst agenta (`CLAUDE.md`, `AGENTS.md`).
+Pełny łańcuch Modułu 1 obejmuje rezultaty z Lekcji 1–4 (uwzględnione ponownie, aby można było poprawić dowolny wcześniejszy kontrakt w trakcie pracy). `/10x-infra-research` jest głównym tematem lekcji; sam krok wdrożenia używa wbudowanego **Plan Mode** hosta, a nie dedykowanej umiejętności — to artefakt (`context/deployment/deploy-plan.md`) jest przekazywany dalej.
 
 ### Router zadań — od czego zacząć
 
-| Skill | Użyj go, gdy |
-| --- | --- |
-| **Bootstrap (główny temat lekcji)** | |
-| `/10x-bootstrapper` | Masz przekazanie w `context/foundation/tech-stack.md` (utworzone przez `/10x-tech-stack-selector`) i jesteś gotowy przygotować szkielet projektu w bieżącym katalogu. Skill odczytuje przekazanie, wyszukuje wybraną kartę w rejestrze starterów, uruchamia jej CLI za pomocą jednej z trzech strategii cwd (utworzenie szkieletu w katalogu tymczasowym, a następnie przeniesienie plików wyżej; utworzenie szkieletu bezpośrednio w bieżącym katalogu; klonowanie repozytorium startera bez zachowywania jego historii git), zawsze zachowuje `context/`, odkłada inne kolizje jako rodzeństwo `.scaffold`, wykonuje lekką kontrolę aktualności przed utworzeniem szkieletu i pogłębiony audyt po jego utworzeniu oraz zapisuje dziennik weryfikacji w `context/changes/bootstrap-verification/verification.md`. Użyj PO `/10x-tech-stack-selector`. |
-| **W razie potrzeby uruchom ponownie wcześniejszy etap** | |
-| `/10x-init` / `/10x-shape` / `/10x-prd` / `/10x-tech-stack-selector` | Dołączone, aby można było poprawić PRD lub zmienić stos w trakcie pracy. Jeśli `/10x-bootstrapper` zgłosi odmowę z powodu rozbieżności rejestru albo zmienisz zdanie co do startera, uruchom ponownie `/10x-tech-stack-selector`, aby ponownie wygenerować `tech-stack.md`, a następnie wywołaj ponownie. |
+| Umiejętność                                                                                                                                                                                    | Użyj jej, gdy                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Infrastruktura (temat lekcji)**                                                                                                                                                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `/10x-infra-research [path-to-tech-stack-or-prd]`                                                                                                                                              | Masz `context/foundation/tech-stack.md` (a najlepiej także `prd.md`) i musisz wybrać platformę wdrożeniową dla MVP. Umiejętność ładuje stack jako twarde ograniczenie, przeprowadza 5-pytaniowy wywiad z deweloperem (trwałe połączenia, wrażliwość na koszty, istniejąca znajomość, zasięg globalny, preferencja współlokalizacji), uruchamia równoległe badania subagentów dla sześciu kandydujących platform, ocenia je jako Pass/Partial/Fail według pięciu kryteriów przyjaznych agentom z `references/agent-friendly-criteria.md`, wybiera trzy najlepsze i przeprowadza kontrolę antybiasową lidera z trzech perspektyw (adwokat diabła, pre-mortem, niewiadome niewiadome), zanim zapisze `context/foundation/infrastructure.md`. Użyj PO `/10x-tech-stack-selector`, PRZED `/10x-implement`. |
+| **Wdrożenie (wbudowane w hosta, nie jest umiejętnością)**                                                                                                                                      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Plan Mode deploy                                                                                                                                                                               | Masz `infrastructure.md` + `tech-stack.md` i chcesz, aby plan tylko do odczytu został sprawdzony, zanim jakakolwiek zmiana trafi na platformę. Aktywuj tryb planowania hosta (Claude Code: `Shift+Tab` przełącza default → auto-accept → plan; IDE: dedykowany przycisk) za pomocą promptu „Wykonajmy pierwsze wdrożenie w oparciu o `@infrastructure.md`, zgodnie ze stackiem z `@tech-stack.md`”. Przeczytaj plan, zażądaj poprawek, zatwierdź go, a następnie pozwól agentowi wykonać działania. Zatwierdzony plan jest zachowywany w `context/deployment/deploy-plan.md`, aby planowanie kamieni milowych w kolejnej lekcji mogło odwołać się do tego, co zostało już wdrożone i które sekrety są już podłączone.                                                                                 |
+| **W razie potrzeby uruchom ponownie poprzedni etap**                                                                                                                                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `/10x-init` / `/10x-shape` / `/10x-prd` / `/10x-tech-stack-selector` / `/10x-bootstrapper` / `/10x-agents-md` / `/10x-rule-review` / `/10x-lesson` / `/10x-stack-assess` / `/10x-health-check` | Zebrane razem, aby można było poprawić dowolny wcześniejszy kontrakt w trakcie pracy. Jeśli kontrola antybiasowa wymusi zmianę platformy, która wpływa na decyzję ukształtowaną przez stack (np. „ta DB nie pasuje do żadnej platformy, którą zaakceptowalibyśmy”), uruchom ponownie `/10x-tech-stack-selector`, aby zachować zgodność `tech-stack.md` i `infrastructure.md`.                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
-### Jak łańcuch przekazuje pracę
+### Jak łańcuch przekazuje pracę dalej
 
-- `/10x-tech-stack-selector` (Lekcja 2) zapisuje `context/foundation/tech-stack.md` z frontmatterem zawierającym 4 klucze (`starter_id`, `package_manager`, `project_name`, `hints`) oraz jedn akapit treści `## Why this stack`.
-- `/10x-bootstrapper` odczytuje ten plik W CAŁOŚCI (bez fallbacku do historii rozmowy). Jeśli go nie ma, skill odmawia, podając jednolinijkowe przekierowanie do `/10x-tech-stack-selector`, i zatrzymuje się — bez wbudowanego mini-przekazania, bez trybu samodzielnego w v1.
-- Wybrane `starter_id` jest wyszukiwane w `/skills/10x-tech-stack-selector/references/starter-registry.yaml`. Skill korzysta z tego rejestru; nie jest jego właścicielem. Walidator CI (`scripts/validate-starter-registry-sync.mjs`) zapobiega odwoływaniu się przez bootstrapper do `starter_id`, którego nie ma w rejestrze.
-- Skill zapisuje `context/changes/bootstrap-verification/verification.md` jako dziennik ścieżki audytowej uruchomienia. Schemat znajduje się w `/skills/10x-bootstrapper/references/verification-log-schema.md`.
+- `/10x-infra-research` odczytuje `context/foundation/tech-stack.md` (język, framework, runtime, baza danych) jako **twarde ograniczenia** — platformy, które nie obsługują stacka, są odrzucane przed oceną. Odczytuje także `context/foundation/prd.md` (skala, opóźnienia, oczekiwania dotyczące dostępności) jako **miękkie wagi** podczas oceniania. Oba wejścia są opcjonalne, ale zdecydowanie zalecane; bez nich umiejętność działa dalej, lecz wyświetla ostrzeżenie.
+- Umiejętność zapisuje `context/foundation/infrastructure.md` jako trzeci kontrakt fundamentowy: frontmatter (`project`, `researched_at`, `recommended_platform`, `runner_up`, `context_type`, `tech_stack`) oraz treść obejmującą rekomendację, pełne porównanie platform z macierzą ocen, ustalenia antybiasowe, model operacyjny (preview / secrets / rollback / approval / logs) i rejestr ryzyk wiążący każdy wpis z perspektywą, która go ujawniła. W przypadku kolizji umiejętność pyta: nadpisać, zapisać jako `infrastructure-v2.md` czy przerwać.
+- Plan Mode odczytuje razem `infrastructure.md` i `tech-stack.md`. Agent generuje plan krok po kroku obejmujący zautomatyzowane kroki, za które odpowiada, ręczne bramki konfiguracji (utworzenie konta, konfiguracja sekretów), dokładne komendy wdrożeniowe (komendy Pages i Workers NIE są wymienne w Cloudflare — plan musi to określać) oraz kroki weryfikacji. Plan jest odrzucany/edytowany, dopóki nie będzie poprawny; dopiero wtedy Plan Mode kończy działanie i rozpoczyna się wykonanie. Zatwierdzony plan trafia do `context/deployment/deploy-plan.md` i jest wykorzystywany dalej przez umiejętności planowania kamieni milowych jako źródło prawdy dla „tego, co jest już wdrożone”.
 
-### Co bootstrapper obejmuje (a czego NIE obejmuje)
+### Co przechwytują umiejętności tej lekcji (a czego NIE)
 
-- **Obejmuje (v1)**: tworzenie szkieletu przez `cmd_template` wybranej karty (delegowanie do CLI, nie generowanie plików inline), trzy strategie cwd wybierane z `bootstrapper-config.yaml` (`subdir-then-move`, `native-cwd`, `git-clone`), rygorystyczną politykę konfliktów tworzącą rodzeństwo `.scaffold` + zawsze zachowującą `context/`, dwa etapy weryfikacji (lekka kontrola aktualności przed utworzeniem szkieletu + pogłębiony audyt zależny od języka po jego utworzeniu), podsumowanie audytu według poziomów istotności, pełny dziennik weryfikacji na dysku.
-- **NIE obejmuje w v1 (celowo)**: generowania `AGENTS.md` / `CLAUDE.md` (odroczone do przyszłej Lekcji 4 — „Architektura pamięci”); nakładek rozmieszczenia elementów certyfikacyjnych dla poszczególnych starterów (należą do przyszłego skilla kontekstu agenta, nie tutaj); plików workflow CI; fallbacku AI-as-bridge dla stosów spoza rejestru (odroczone do v2 — w v1 tech-stack-selector w trybie łańcuchowym już ogranicza wybór do rejestru, więc taki przypadek nie może wystąpić); trybu samodzielnego, w którym użytkownik podaje stos inline bez przekazania (odroczone do v2); działań kompensacyjnych dla `bootstrapper_confidence: best-effort` lub `quality_override: true` (widoczne w rozmowie, ale bez automatycznego działania następczego — to również zadanie przyszłego skilla architektury pamięci).
+- **`/10x-infra-research` przechwytuje**: shortlistę platform ocenionych według pięciu kryteriów przyjaznych agentom (jakość CLI, stopień zarządzania/serverless, dokumentacja czytelna dla agenta, stabilne/skryptowalne API wdrożeniowe, MCP lub integracja agentowa pierwszej klasy), trzy wyniki kontroli antybiasowej lidera (ponumerowane słabości, 150–200-słowowa narracja porażki, 3–5 niewiadomych niewiadomych), model operacyjny z jedną konkretną odpowiedzią dla każdej osi (nie kategoriami) oraz rejestr ryzyk, w którym każdy wiersz wskazuje źródłową perspektywę (`Devil's advocate` / `Pre-mortem` / `Unknown unknowns` / `Research finding`). Status każdej funkcji niebędącej GA jest przechwytywany inline (`beta` / `preview` / `region-limited` / `deprecated`) wraz z datą sprawdzenia statusu.
+- **`/10x-infra-research` NIE** buduje obrazów Docker ani nie pisze Dockerfile'ów, nie konfiguruje potoków CI/CD ani nie planuje poza zakresem MVP (multi-region HA jest wyraźnie poza zakresem). NIE podejmuje decyzji za Ciebie — użytkownik akceptuje, zamienia na runner-up albo przerywa po kontroli, a decyzja ta jest zapisywana w wyniku.
+- **Plan Mode** przechwytuje: wyraźną bramkę człowieka między „agent ma plan” a „agent modyfikuje produkcję”. Artefakt (`deploy-plan.md`) jest ścieżką audytową dla „tego, co miało się wydarzyć”, gdy rzeczywiste wykonanie pójdzie źle. Plan Mode NIE zastępuje `/10x-infra-research` (decyzja o platformie musi być już podjęta — Plan Mode planuje wdrożenie, nie wybiera miejsca wdrożenia).
 
-### Polityka konfliktów
+### Pięć kryteriów przyjaznych agentom (i dlaczego są nośne)
 
-Gdy skill przenosi pliki z tymczasowego katalogu szkieletu do bieżącego katalogu roboczego, stosuje rygorystyczną macierz:
+Kryteria tworzące macierz ocen `/10x-infra-research` nie są ogólnymi osiami „dobrej platformy” — są to konkretne cechy określające, czy agent może obsługiwać tę platformę z sesji bez prowadzenia go za rękę:
 
-- **`context/**`** — wszystko, co szkielet próbował zapisać w `context/`, jest **odrzucane**. Twoje `context/` jest źródłem prawdy dla łańcucha bootstrap (PRD, przekazanie tech-stack, plany, ramy) i nigdy nie jest nadpisywane.
-- **`.gitignore`** — scalanie przez dopisanie: istniejące linie pozostają w kolejności, a następnie linie ze szkieletu są odduplikowywane względem Twojego zestawu i dopisywane z komentarzem-separatorem. Semantyka ignorowania Git jest addytywna, więc łączenie jest bezpieczne.
-- **`package.json`, `README.md`, `CLAUDE.md`, `AGENTS.md`, root-level `*.md`** — wygrywa istniejący plik; kopia ze szkieletu trafia jako rodzeństwo `<filename>.scaffold`. Możesz użyć `diff README.md README.md.scaffold`, aby zobaczyć, co dostarczył starter, a co już było.
-- **Wszystko inne** — jest przenoszone bez komunikatu, jeśli nie ma konfliktu, albo odkładane jako `<filename>.scaffold`, jeśli konflikt występuje. Macierz nigdy nie usuwa plików użytkownika.
+1. **CLI-first** — każda rutynowa operacja ma udokumentowaną komendę; agent nie musi klikać w panelu.
+2. **Managed / serverless** — mniej ruchomych elementów oznacza mniej sposobów, w jakie agent (lub Ty) może zepsuć coś, czym platforma miała się zajmować.
+3. **Agent-readable docs** — dokumentacja markdown / `llms.txt` / hostowana na GitHubie, którą agent może pobrać i sparsować, a nie strony marketingowe renderowane przez JS.
+4. **Stable, scriptable deploy API** — przewidywalne kody wyjścia, ustrukturyzowany output, brak interaktywnych promptów w trakcie wdrożenia.
+5. **MCP server or first-class agent integration** — bonus, nie wymóg. Samo CLI wystarcza dla MVP; MCP zyskuje na znaczeniu, gdy agent wykonuje dziesiątki ustrukturyzowanych zapytań względem stanu produkcyjnego.
 
-Dla strategii `git-clone` (10x-astro-starter i podobne): sklonowane `.git/` jest usuwane przed przeniesieniem wyżej, dzięki czemu historia upstreamowego startera nie przedostaje się do Twojego repozytorium. Następnie inicjalizujesz własną historię (`git init`).
+Twarde filtry są stosowane przed ocenianiem (wymóg trwałego połączenia odrzuca Netlify/Vercel obsługujące wyłącznie serverless; niezgodność runtime stacka całkowicie odrzuca platformę). Odpowiedzi z wywiadu później zmieniają wagi kryteriów — wrażliwość na koszty karze drogie poziomy bazowe, znajomość rozstrzyga remisy, preferencja zasięgu globalnego faworyzuje platformy edge-native, a preferencja współlokalizacji faworyzuje zintegrowane bazy danych.
 
-### Dziennik weryfikacji
+### Antybias jako dyscyplina decyzyjna (nie teatr)
 
-Każde uruchomienie zapisuje `context/changes/bootstrap-verification/verification.md`. Sekcje:
+Każda rozmowa badawcza z LLM ma wbudowane przechylenie w stronę tego, co użytkownik już zasygnalizował. `/10x-infra-research` uruchamia trzy ustrukturyzowane perspektywy wobec lidera PRZED zapisaniem pliku, a nie po:
 
-- **`## Hand-off`** — dosłowna kopia frontmatteru tech-stack.md oraz treści `## Why this stack`.
-- **`## Pre-scaffold verification`** — tabela ustaleń dotyczących aktualności (wersja pakietu npm + `time.modified` dla starterów JS; GitHub `pushed_at` dla każdego startera z GitHub `docs_url`).
-- **`## Scaffold log`** — rozstrzygnięte wywołanie CLI, kod wyjścia, przeniesione pliki, konflikty przedstawione jako rodzeństwo `.scaffold`, obsługa `.gitignore`.
-- **`## Post-scaffold audit`** — pełne dane wyjściowe audytu dla każdego języka (`npm audit --json` dla JS, `pip-audit` dla Python, `cargo audit` dla Rust itd.). Podział według poziomów istotności: CRITICAL i HIGH są prezentowane inline na czacie, MODERATE i LOW tylko w dzienniku. Podział na bezpośrednie i przechodnie zależności, jeśli narzędzie go obsługuje.
-- **`## Hints recorded but not acted on`** — każda wskazówka z przekazania, którą bootstrapper odczytał, ale na której nie działał w v1. Kompletność ścieżki audytowej dla przyszłego skilla architektury pamięci.
-- **`## Next steps`** — tekst wskazujący dalsze kroki. v1 podaje „your project is scaffolded and verified — happy hacking” i oznacza przyszły skill z Lekcji 4 jako następne ogniwo łańcucha.
+- **Devil's advocate** — _znajdź słabości, ukryte koszty i tryby awarii specyficzne dla wdrażania `<this stack>` na `<this platform>`_. Wynikiem jest ponumerowana lista 3–5 konkretów, a nie kategorii.
+- **Pre-mortem** — _sześć miesięcy później ta decyzja okazała się kompletną katastrofą; przeanalizuj założenia i niedoszacowane ryzyka, które do tego doprowadziły_. Wynikiem jest narracja o długości 150–200 słów; narracje ujawniają konkretne kształty porażki, które ukrywają abstrakcyjne listy ryzyk.
+- **Unknown unknowns** — _co jest prawdą o tej kombinacji, czego strona marketingowa i dokumentacja nie czynią oczywistym?_ Wynikiem jest 3–5 nieoczywistych ryzyk.
 
-Folder (`context/changes/bootstrap-verification/`) celowo nie zawiera `change.md`. Uruchomienia bootstrap są jednorazowymi artefaktami, a nie śledzonymi zmianami workflow — folder zawiera dziennik i nic więcej. Ponowne uruchomienia stosują zabezpieczenie ostrzegające i wymagające potwierdzenia przed nadpisaniem; furtką awaryjną jest `verification-v2.md` (i tak dalej).
+Po kontroli użytkownik ma trzy rzeczywiste opcje: **kontynuować z liderem i włączyć ryzyka do rejestru**, **zamienić na runner-up** (i ponownie przeprowadzić kontrolę dla nowego lidera) albo **zamienić na trzecie miejsce**. Trzecia opcja zdarza się rzadko; jeśli nigdy nie występuje w wielu uruchomieniach, kontrola zdegradowała się do rytuału i należy ją przepisać.
 
-### Ścieżki foundation używane przez tę lekcję
+Dwie dodatkowe techniki (nie wymagają umiejętności, surowe prompty) należą do tego samego zestawu narzędzi: zmuszenie modelu do porównania trzech alternatyw w tabeli markdown (struktura jest lepsza niż „ta sama odpowiedź innymi słowami”) oraz rotacja ról (ta sama decyzja oczami frontend developera, osoby od bezpieczeństwa i właściciela kosztów — ujawnij koszt, który ponosi każda rola, i zaproponuj alternatywy, jeśli któraś z nich się waha).
 
-- `context/foundation/tech-stack.md` — wejście (z Lekcji 2)
-- `context/changes/bootstrap-verification/verification.md` — wyjście (dziennik ścieżki audytowej)
-- `context/foundation/lessons.md` — powtarzające się reguły i pułapki
-- `docs/reference/contract-surfaces.md` — rejestr kluczowych nazw
+### CLI kontra MCP dla operacyjności live-infra
+
+Po wdrożeniu agent potrzebuje sposobu komunikacji z działającą platformą. Dwie ścieżki, uzupełniające się, a nie konkurujące:
+
+- **CLI** (`wrangler`, `flyctl`, `vercel`, `gh`) — jawne i audytowalne, output pozostaje w terminalu, bezpieczniejsze ustawienia domyślne dla nieodwracalnych działań (np. `netlify deploy` domyślnie tworzy draft; należy przekazać `--prod`). Najlepsze dla MVP: minimalna konfiguracja, niski koszt kontekstu (brak wstępnie załadowanych schematów narzędzi), a agent musi znać komendę (w czym pomaga umiejętność per narzędzie).
+- **MCP** — dedykowany serwer udostępniający ustrukturyzowane narzędzia ze schematami (`pages_deployments_list` itp.). Każdy podłączony serwer MCP dodaje definicje narzędzi do okna kontekstowego, więc koszt kumuluje się między serwerami. Zyskuje na znaczeniu, gdy agent wykonuje wiele zapytań typu discovery względem stanu produkcyjnego (logi, różnice wdrożeń), a ustrukturyzowany JSON jest lepszy niż parsowanie outputu CLI.
+
+Rozsądne ustawienie domyślne: zacznij od CLI, dodaj MCP, gdy zauważysz powtarzalny wzorzec przechodzenia przez `--help`, który agent musi wykonywać, aby odpowiedzieć na określoną klasę pytań. Ujęcie Anthropic w [building-agents-that-reach-production](https://claude.com/blog/building-agents-that-reach-production-systems-with-mcp) brzmi: „API, CLI i MCP to trzy uzupełniające się ścieżki” — wybieraj według zadania, nie według hype'u.
+
+### Granica dostępu do produkcji (minimalne uprawnienia, człowiek przy nieodwracalnych działaniach)
+
+Zarówno CLI, jak i MCP mogą dać agentowi bezpośredni dostęp do produkcji. Lekcja ustawia domyślną postawę:
+
+- **Tokeny są ograniczone zakresem, nie są kluczami głównymi.** W Cloudflare: token API ograniczony do Pages lub Workers dla jednego projektu, bez DNS, bez Workers Secrets dla niepowiązanych projektów, bez rozliczeń. Odpowiednik AWS / GCP: ograniczona rola IAM z `console-only-user` lub dostępem tylko do odczytu na produkcji, pełnym dostępem na stagingu.
+- **Tokeny znajdują się w zmiennych env, a nie w `.mcp.json` commitowanym do repo.** Agent pobiera je przez serwer MCP lub wykrywanie env przez CLI, a nie przez plaintext w rozmowie.
+- **Destrukcyjne działania wykonuje wyłącznie człowiek.** Usunięcie bazy danych, rotacja głównego sekretu, skasowanie projektu — są to operacje wykonywane ręcznie w panelu, nawet jeśli agent je sugeruje. Ręczne kliknięcie kosztuje 30 sekund; sprzątanie po automatycznym błędzie kosztuje godziny.
+
+To jest postawa dla MVP. W miarę dojrzewania projektu naturalna ewolucja wygląda tak: staging otrzymuje pełny dostęp agenta, a produkcja staje się tylko do odczytu — co omawiają późniejsze moduły.
+
+### Ścieżki fundamentowe używane przez tę lekcję
+
+- `context/foundation/tech-stack.md` — wejście (przekazanie z Lekcji 2, twarde ograniczenia)
+- `context/foundation/prd.md` — wejście (przekazanie z Lekcji 1, miękkie wagi)
+- `context/foundation/infrastructure.md` — wyjście (trzeci kontrakt fundamentowy)
+- `context/deployment/deploy-plan.md` — wyjście Plan Mode deploy (ścieżka audytowa „tego, co miało się wydarzyć”)
+- `context/foundation/lessons.md` — powtarzające się zasady i pułapki (użyj `/10x-lesson` z Lekcji 4, jeśli podczas badań lub wdrożenia zauważysz klasę błędu agenta)
+- `docs/reference/contract-surfaces.md` — rejestr nazw nośnych
 
 ### Uniwersalny język
 
-Dostarczony skill nie zawiera odniesień do 10xDevs / kohort / certyfikacji. Audyt po utworzeniu szkieletu jest wybierany według `language_family` na podstawie niewielkiej tabeli wyszukiwania; kohorty, których stos trafia do `java`, `php`, `dart` lub kombinacji wielu języków, zobaczą w dzienniku linię „no built-in audit tool for this ecosystem” oraz rekomendowane narzędzie zewnętrzne, a nie fałszywy wpis „0 findings”.
+Dostarczona umiejętność nie zawiera odniesień do 10xDevs / cohort / certification. Lista kandydatów na platformy (Cloudflare, Vercel, Netlify, Fly.io, Railway, Render) jest punktem wyjścia dla badań, a nie zbiorem rekomendacji — nośny jest potok scoring + interview + cross-check, a platformę nieobecną na domyślnej liście można dodać przez rozszerzenie kroku badawczego. Pięć kryteriów przyjaznych agentom to rzeczywisty rdzeń artefaktu; `/10x-infra-research` ponownie odczytuje je z `references/agent-friendly-criteria.md`, aby ewoluowały wraz z platformami.
 
-Skille nie mogą zapisywać do `context/archive/`. Zarchiwizowane zmiany są niezmienne; jeśli rozstrzygnięta ścieżka docelowa zaczyna się od `context/archive/`, przerwij z komunikatem: „This change is archived. Open a new change with `/10x-new` instead.”
+Umiejętności nie mogą zapisywać do `context/archive/`. Zarchiwizowane zmiany są niezmienne; jeśli rozwiązana ścieżka docelowa zaczyna się od `context/archive/`, przerwij z komunikatem: „This change is archived. Open a new change with `/10x-new` instead.”
 
 <!-- END @przeprogramowani/10x-cli -->
