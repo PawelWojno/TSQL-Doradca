@@ -79,6 +79,9 @@ const scriptsConfig = defineConfig({
 
 export default defineConfig(
   includeIgnoreFile(gitignorePath),
+  // Skill helpers are Node scripts for agents, not app source. Type-aware lint
+  // (projectService) cannot attach them to tsconfig.json and fails CI.
+  { ignores: [".claude/**"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
