@@ -50,6 +50,7 @@ create policy analysis_suggestions_insert_own on public.analysis_suggestions
 create or replace function public.analyses_guard_update()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 begin
   if new.query_text is distinct from old.query_text
