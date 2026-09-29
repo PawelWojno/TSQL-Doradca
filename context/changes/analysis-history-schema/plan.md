@@ -236,5 +236,5 @@ Nie dotyczy — greenfield, brak istniejących danych do migracji.
 
 #### Automated
 
-- [x] 2.1 `npx astro check` przechodzi bez błędów
-- [x] 2.2 `npm run lint` przechodzi bez błędów
+- [x] 2.1 `npx astro check` przechodzi bez błędów — 1dd5a1a
+- [x] 2.2 `npm run lint` przechodzi bez błędów — 1dd5a1a

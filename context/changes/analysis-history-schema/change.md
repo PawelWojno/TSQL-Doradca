@@ -1,7 +1,7 @@
 ---
 change_id: analysis-history-schema
 title: Schemat Supabase dla zapisanych analiz (F-01)
-status: implementing
+status: implemented
 created: 2026-09-29
 updated: 2026-09-29
 archived_at: null
