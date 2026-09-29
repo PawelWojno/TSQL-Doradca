@@ -3,7 +3,7 @@ project: "T-SQL Doradca"
 version: 1
 status: draft
 created: 2026-09-28
-updated: 2026-09-28
+updated: 2026-09-29
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -39,11 +39,11 @@ Deweloperzy w zespole dziś sprawdzają zapytania T-SQL pod kątem znanych antyw
 
 ## At a glance
 
-| ID   | Change ID                        | Outcome (user can …)                                                    | Prerequisites | PRD refs                                      | Status   |
-| ---- | -------------------------------- | ----------------------------------------------------------------------- | ------------- | --------------------------------------------- | -------- |
-| F-01 | analysis-history-schema          | (foundation) tabela `analyses` z RLS per-właściciel istnieje w Supabase | —             | NFR (trwałość), Access Control                | ready    |
-| S-01 | first-gated-query-analysis       | wkleja zapytanie, widzi sugestie z wagą, zapisuje do wspólnej historii  | F-01          | US-01, FR-001, FR-002, FR-003, FR-004, FR-007 | proposed |
-| S-02 | owner-managed-analysis-lifecycle | zmienia status własnej analizy i usuwa własną analizę                   | S-01          | FR-005, FR-006                                | proposed |
+| ID   | Change ID                        | Outcome (user can …)                                                    | Prerequisites | PRD refs                                      | Status      |
+| ---- | -------------------------------- | ----------------------------------------------------------------------- | ------------- | --------------------------------------------- | ----------- |
+| F-01 | analysis-history-schema          | (foundation) tabela `analyses` z RLS per-właściciel istnieje w Supabase | —             | NFR (trwałość), Access Control                | in-progress |
+| S-01 | first-gated-query-analysis       | wkleja zapytanie, widzi sugestie z wagą, zapisuje do wspólnej historii  | F-01          | US-01, FR-001, FR-002, FR-003, FR-004, FR-007 | proposed    |
+| S-02 | owner-managed-analysis-lifecycle | zmienia status własnej analizy i usuwa własną analizę                   | S-01          | FR-005, FR-006                                | proposed    |
 
 ## Baseline
 
@@ -70,7 +70,7 @@ Foundations below assume these are present and do NOT re-scaffold them.
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Pierwsza migracja Supabase w tym projekcie (baseline: brak `supabase/migrations`) — ryzyko niskie: jedna tabela, RLS per-właściciel, wzorzec migracji już opisany w `CLAUDE.md`.
-- **Status:** ready
+- **Status:** in-progress
 
 ## Slices
 
