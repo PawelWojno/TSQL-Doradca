@@ -219,22 +219,22 @@ Nie dotyczy — greenfield, brak istniejących danych do migracji.
 
 #### Automated
 
-- [x] 1.1 Nazwa pliku migracji odpowiada konwencji `YYYYMMDDHHmmss_short_description.sql`
-- [x] 1.2 Migracja aplikuje się bez błędów (`supabase start` + `supabase db reset`)
+- [x] 1.1 Nazwa pliku migracji odpowiada konwencji `YYYYMMDDHHmmss_short_description.sql` — cab415b
+- [x] 1.2 Migracja aplikuje się bez błędów (`supabase start` + `supabase db reset`) — cab415b
 
 #### Manual
 
-- [x] 1.3 Utworzono dwóch testowych użytkowników (A i B) w `auth.users`
-- [x] 1.4 Jako A: INSERT wiersza `analyses` + kilku `analysis_suggestions` z rosnącym `position` się udaje
-- [x] 1.5 SELECT: obaj testowi użytkownicy widzą wszystkie wiersze `analyses`/`analysis_suggestions`
-- [x] 1.6 UPDATE/DELETE `analyses`: dozwolone tylko właścicielowi, odrzucone dla innych
-- [x] 1.7 Jako A: UPDATE `status` na `'resolved'` się udaje i `updated_at` się zmienia
-- [x] 1.8 Jako A: UPDATE `query_text` kończy się błędem triggera (niezmienność)
-- [x] 1.9 INSERT `analysis_suggestions` z cudzym `analysis_id` jest odrzucony przez RLS
+- [x] 1.3 Utworzono dwóch testowych użytkowników (A i B) w `auth.users` — cab415b
+- [x] 1.4 Jako A: INSERT wiersza `analyses` + kilku `analysis_suggestions` z rosnącym `position` się udaje — cab415b
+- [x] 1.5 SELECT: obaj testowi użytkownicy widzą wszystkie wiersze `analyses`/`analysis_suggestions` — cab415b
+- [x] 1.6 UPDATE/DELETE `analyses`: dozwolone tylko właścicielowi, odrzucone dla innych — cab415b
+- [x] 1.7 Jako A: UPDATE `status` na `'resolved'` się udaje i `updated_at` się zmienia — cab415b
+- [x] 1.8 Jako A: UPDATE `query_text` kończy się błędem triggera (niezmienność) — cab415b
+- [x] 1.9 INSERT `analysis_suggestions` z cudzym `analysis_id` jest odrzucony przez RLS — cab415b
 
 ### Phase 2: Współdzielone typy TS
 
 #### Automated
 
-- [ ] 2.1 `npx astro check` przechodzi bez błędów
-- [ ] 2.2 `npm run lint` przechodzi bez błędów
+- [x] 2.1 `npx astro check` przechodzi bez błędów
+- [x] 2.2 `npm run lint` przechodzi bez błędów
